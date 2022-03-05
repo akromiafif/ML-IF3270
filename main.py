@@ -9,6 +9,17 @@ act_function = ""
 act_value = 0
 input = 0
 
+
+# ALTERNATIVE ACTIVATION FUNCTIONS
+def activation_func(nama, x):
+  switcher = {
+    "linear" : float(x),
+    "sigmoid" : float(1/(1 + math.exp(-x))),
+    "relu" : float(max(x,0)),
+    "softmax" : float(np.exp(x) / np.sum(np.exp(x))),
+  }
+  return switcher.get(nama, "")
+
 """RELU Activation Function"""
 def relu(x):
   return float(max(x,0))
@@ -25,7 +36,7 @@ def sigmoid(x):
 def softmax(x):
   return float(np.exp(x) / np.sum(np.exp(x)))
 
-"""Activation Function ENUM"""
+# Activation Function ENUM
 activations_func = {
   'linear': linear,
   'sigmoid': sigmoid,
@@ -33,12 +44,12 @@ activations_func = {
   'relu': relu
 }
 
-"""Generate Lyers Function"""
+"""Generate Layers Function"""
 def generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES):
-  if(N_NEURONS < 1):
+  if (N_NEURONS < 1):
     raise ValueError("Neuron harus lebih dari 0")
 
-  if(activations_func in ('linear', 'sigmoid', 'relu', 'softmax')):
+  if ACT_FUNCTION.lower() in activations_func.keys():
     n_neurons = N_NEURONS
     act_function = activations_func[ACT_FUNCTION]
     weights = WEIGHTS
