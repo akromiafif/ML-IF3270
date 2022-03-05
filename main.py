@@ -1,3 +1,6 @@
+from fileinput import filename
+
+from black import out
 import numpy as np
 import math
 
@@ -7,57 +10,57 @@ weights = []
 biases = []
 act_function = ""
 act_value = 0
+num_layer = 0
 input = 0
 
 
 # ALTERNATIVE ACTIVATION FUNCTIONS
 def activation_func(nama, x):
   switcher = {
+    # """Linear Activation Function""" #
     "linear" : float(x),
+
+    # """Sigmoid Activation Function""" #
     "sigmoid" : float(1/(1 + math.exp(-x))),
-    "relu" : float(max(x,0)),
+
+    # """RELU Activation Function""" #
+    "relu" : float(max(x,0)), 
+
+    #"""Softmax Activation Function""" #
     "softmax" : float(np.exp(x) / np.sum(np.exp(x))),
   }
-  return switcher.get(nama, "")
 
-"""RELU Activation Function"""
-def relu(x):
-  return float(max(x,0))
+  if nama not in switcher.keys():
+    raise ValueError("Aktifasi fungsi harus salah satu dari 'linear', 'sigmoid', 'relu', 'softmax'")
+  else:
+    return switcher.get(nama, "")
 
-"""Linear Activation Function"""
-def linear(x):
-  return float(x)
+def openFile(filename):
 
-"""Sigmoid Activation Function"""
-def sigmoid(x):
-  return float(1/(1 + math.exp(-x)))
-
-"""Softmax Activation Function"""
-def softmax(x):
-  return float(np.exp(x) / np.sum(np.exp(x)))
-
-# Activation Function ENUM
-activations_func = {
-  'linear': linear,
-  'sigmoid': sigmoid,
-  'softmax': softmax,
-  'relu': relu
-}
+  file = open(filename)
+  num_layer = int(file.readline())
+    
+  for i in range(num_layer):
+    width, act = file.readline().split()
+    width = int(width)
+    act_function.append(act)
+    
+    weightMatrix = []
+    for j in range(width):
+        weightMatrix.append([int(x) for x in file.readline().split()])
+    
+    weights.append(np.array(weightMatrix))
 
 """Generate Layers Function"""
-def generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES):
+def generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES, X):
   if (N_NEURONS < 1):
     raise ValueError("Neuron harus lebih dari 0")
 
-  if ACT_FUNCTION.lower() in activations_func.keys():
-    n_neurons = N_NEURONS
-    act_function = activations_func[ACT_FUNCTION]
-    weights = WEIGHTS
-    biases = BIASES
-    activation_value = None
-  else:
-    raise ValueError("Aktifasi fungsi harus salah satu dari 'linear', 'sigmoid', 'relu', 'softmax'")
-
+  n_neurons = N_NEURONS
+  act_function = activation_func(ACT_FUNCTION, X)
+  weights = WEIGHTS
+  biases = BIASES
+  activation_value = None
 
 """Forward Pass Function"""
 def pass_forward(INPUT):
