@@ -13,6 +13,10 @@ act_value = 0
 num_layer = 0
 input = 0
 
+layers = []
+n_layers = 0
+prediction = None
+
 def activation_func(nama, x):
   switcher = {
     # """Linear Activation Function""" #
@@ -49,6 +53,13 @@ def openFile(filename):
     
     weights.append(np.array(weightMatrix))
 
+""" Initialize bias and weight"""
+def getBias(matrix):
+  return matrix[0][:,0]
+
+def getWeights(matrix):
+  return matrix[0][:,1:3]
+
 """Generate Layers Function"""
 def generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES, X):
   if (N_NEURONS < 1):
@@ -59,6 +70,10 @@ def generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES, X):
   weights = WEIGHTS
   biases = BIASES
   activation_value = None
+
+"""Add Layer Function"""
+def add_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES, X):
+  layers.append(generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES, X))
 
 """Forward Pass Function"""
 def pass_forward(INPUT):
