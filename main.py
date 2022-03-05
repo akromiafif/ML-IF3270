@@ -1,85 +1,79 @@
-from fileinput import filename
-
-from black import out
+from asyncio.windows_events import NULL
 import numpy as np
 import math
+import json
 
-"""Global Variables"""
-n_neurons = 0
-weights = []
-biases = []
-act_function = ""
-act_value = 0
-num_layer = 0
-input = 0
-
-layers = []
-n_layers = 0
-prediction = None
-
+''' --- Activation Function --- '''
 def activation_func(nama, x):
   switcher = {
-    # """Linear Activation Function""" #
-    "linear" : float(x),
-
-    # """Sigmoid Activation Function""" #
-    "sigmoid" : float(1/(1 + math.exp(-x))),
-
-    # """RELU Activation Function""" #
-    "relu" : float(max(x,0)), 
-
-    #"""Softmax Activation Function""" #
-    "softmax" : float(np.exp(x) / np.sum(np.exp(x))),
+    "linear" : x,
+    "sigmoid" : 1 / (1 + np.exp(-x)),
+    "relu" : np.maximum(0, x),
+    "softmax" : np.exp(x) / np.sum(np.exp(x)),
   }
+  return switcher.get(nama, "")
 
-  if nama not in switcher.keys():
-    raise ValueError("Aktifasi fungsi harus salah satu dari 'linear', 'sigmoid', 'relu', 'softmax'")
-  else:
-    return switcher.get(nama)
+''' --- Info --- '''
+def print_info():
+    print(f"# Jumlah Layer: {len(layers)}")
+    for idx in range(len(layers)):
+        print(f"Layer ({idx+1})")
+        print(f"- Jumlah Neuron: {layers[idx]['n_neuron']}")
+        print(f"- Jenis Fungsi Aktivasi: {layers[idx]['activation_function']}")
+        print(f"- Nilai Aktivasi: \n\t{layers[idx]['activation_value']}")
+        print(f"- Bobot: \n\t{layers[idx]['weights']}")
+        print(f"- Bias: \n\t{layers[idx]['biases']}\n")
+    print(f"# Hasil Prediksi: {final_predictions}")
 
-def openFile(filename):
+''' --- File Handler --- '''
+def json_to_data(filename):
+    f = open(filename)
+    model = json.load(f)
+    f.close()
 
-  file = open(filename)
-  num_layer = int(file.readline())
+    return model
+
+''' --- Predict --- '''
+def predict(array):
+
+    prediction = NULL
+    for idx in range(len(layers)):
+        x = np.dot(array, np.array(layers[idx]["weights"])) + np.array(layers[idx]["biases"]) \
+            if idx == 0 else np.dot(layers[idx-1]["activation_value"], np.array(layer["weights"])) + np.array(layer["biases"])
+
+        layers[idx]["activation_value"] = activation_func(layers[idx]["activation_function"], x)
     
-  for i in range(num_layer):
-    width, act = file.readline().split()
-    width = int(width)
-    act_function.append(act)
-    
-    weightMatrix = []
-    for j in range(width):
-        weightMatrix.append([int(x) for x in file.readline().split()])
-    
-    weights.append(np.array(weightMatrix))
+    last_layer_activation_value = layers[-1]["activation_value"]
+    prediction = np.copy(last_layer_activation_value)
+    prediction = prediction.reshape(prediction.shape[0], 1)
 
-""" Initialize bias and weight"""
-def getBias(matrix):
-  return matrix[0][:,0]
+    return prediction
 
-def getWeights(matrix):
-  return matrix[0][:,1:3]
+def final_predict(predictions):
+    for prediction in predictions:
+        final_predictions.append(0 if prediction < 0.5 else 1)
 
-"""Generate Layers Function"""
-def generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES, X):
-  if (N_NEURONS < 1):
-    raise ValueError("Neuron harus lebih dari 0")
+''' --- Main Program ---'''
+FILENAME = 'model.json'
+ACTIVATION_FUNCTION = ["linear", "sigmoid", "relu", "softmax"]
 
-  n_neurons = N_NEURONS
-  act_function = activation_func(ACT_FUNCTION, X)
-  weights = WEIGHTS
-  biases = BIASES
-  activation_value = None
-
-"""Add Layer Function"""
-def add_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES, X):
-  layers.append(generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES, X))
-
-"""Forward Pass Function"""
-def pass_forward(INPUT):
-  input = INPUT
-  act_value = act_function(INPUT)
+layers = []
+final_predictions = []
 
 if __name__ == "__main__":
-  print(activation_func('linear', 10))
- 
+    model = json_to_data(FILENAME)
+    print(f"\nModel: \n{model}\n")
+    for layer in model:
+
+        # Validate
+        if layer["n_neuron"] < 1:
+            ValueError("Neuron harus lebih dari 1")
+        if layer["activation_function"].lower() not in ACTIVATION_FUNCTION:
+            raise ValueError("Fungsi Aktivasi harus salah satu dari 'linear', 'sigmoid', 'relu', 'softmax'")
+
+        layers.append(layer)
+
+    predictions = predict(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]))
+    final_predict(predictions)
+
+    print_info()
