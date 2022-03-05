@@ -25,6 +25,7 @@ def sigmoid(x):
 def softmax(x):
   return float(np.exp(x) / np.sum(np.exp(x)))
 
+"""Activation Function ENUM"""
 activations_func = {
   'linear': linear,
   'sigmoid': sigmoid,
@@ -32,6 +33,7 @@ activations_func = {
   'relu': relu
 }
 
+"""Generate Lyers Function"""
 def generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES):
   if(N_NEURONS < 1):
     raise ValueError("Neuron harus lebih dari 0")
@@ -46,6 +48,7 @@ def generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES):
     raise ValueError("Aktifasi fungsi harus salah satu dari 'linear', 'sigmoid', 'relu', 'softmax'")
 
 
+"""Forward Pass Function"""
 def pass_forward(INPUT):
   input = INPUT
   act_value = act_function(INPUT)
