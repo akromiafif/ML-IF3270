@@ -13,8 +13,6 @@ act_value = 0
 num_layer = 0
 input = 0
 
-
-# ALTERNATIVE ACTIVATION FUNCTIONS
 def activation_func(nama, x):
   switcher = {
     # """Linear Activation Function""" #
@@ -33,7 +31,7 @@ def activation_func(nama, x):
   if nama not in switcher.keys():
     raise ValueError("Aktifasi fungsi harus salah satu dari 'linear', 'sigmoid', 'relu', 'softmax'")
   else:
-    return switcher.get(nama, "")
+    return switcher.get(nama)
 
 def openFile(filename):
 
@@ -66,3 +64,7 @@ def generate_layer(N_NEURONS, ACT_FUNCTION, WEIGHTS, BIASES, X):
 def pass_forward(INPUT):
   input = INPUT
   act_value = act_function(INPUT)
+
+if __name__ == "__main__":
+  print(activation_func('linear', 10))
+ 
